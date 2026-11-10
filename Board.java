@@ -137,4 +137,13 @@ public class Board {
 		}
 		return false;
 	}
+
+	// returns value that specific coords (Assumes coords are valid)
+	public String getValue(int x, int y) {
+		return squares[x][y];
+	}
+
+	public void setValue(int x, int y, String s) {
+		squares[x][y] = s;
+	}
 }
