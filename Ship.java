@@ -6,6 +6,7 @@ public class Ship {
     private int x;
     private int y;
     private boolean horizontal;
+    private int[][] coords;
     private int health;
     private Board b;
 
@@ -15,6 +16,7 @@ public class Ship {
         x = xPos;
         x = yPos;
         horizontal = hor;
+        coords = new int[size][2];
         health = len;
         b = bo;
     }
@@ -35,9 +37,41 @@ public class Ship {
                 }
             }
 
+            boolean temp;
             for (int j = 0; j < size; j++) {
-                b.setValue(x + i, y, "b");
+                coords[j][0] = x + j;
+                coords[j][1] = y;
+                temp = b.setValue(x + j, y, "b");
+            }
+        } else {
+            if (y + size > 9) {
+                return false;
+            }
+
+            for (int i = 0; i < size; i++) {
+                if (b.getValue(x, y + 1).equals("b")) {
+                    return false;
+                }
+            }
+
+            boolean temp;
+            for (int j = 0; j < size; j++) {
+                coords[j][0] = x;
+                coords[j][1] = y + j;
+                temp = b.setValue(x, y + j, "b");
             }
         }
+        return true;
+    }
+
+    public void updateHit() {
+        health--;
+        if (health == 0) {
+            sink();
+        }
+    }
+
+    public void sink() {
+        System.out.println("You've sunk " + name);
     }
 }
