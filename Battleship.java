@@ -7,12 +7,11 @@ public class Battleship {
     private boolean shipLen4 = false;
     
     public Battleship() {
-        System.out.println("Welcome to Battleship!");
-        setUp();
+        setUp(); // setUp necessary because cnostructors can't be recursive
     }
 
     private void setUp() {
-        System.out.println("Type \"a\" to add a new ship, \"b\" to see the board, \"p\" to play or \"q\" to quit.");
+        System.out.println("Type \"a\" to add a new ship, \"b\" to see the board, or \"e\" to end building board.");
         String input = sc.nextLine();
 
         // guides all possible actions
@@ -20,16 +19,12 @@ public class Battleship {
             addShip();
         } else if (input.equals("b")) {
             System.out.println("\n" + b.toString());
-        } else if (input.equals("p")) {
+        } else if (input.equals("e")) {
             if (shipLen3 && shipLen4) {
-                System.out.println("Ok, let's play!");
-                play();
                 return;
             } else {
                 System.out.println("You need ships of length 3 and 4 to play!");
             }
-        } else if (input.equals("q")) {
-            return;
         }
 
         setUp();
@@ -37,11 +32,14 @@ public class Battleship {
 
     // adds ship
     private void addShip() {
-        int row = promptUserInt("Starting in which row?");
-        int col = promptUserInt("Starting in which column?");
-        int len = promptUserInt("How long?");
+        int row = promptUserInt("Starting in which row?", 0, 9);
+        int col = promptUserInt("Starting in which column?", 0, 9);
+        int len = promptUserInt("How long?", 0, 10);
+        boolean orientation = promptUserChar();
+        System.out.println("Name of ship?");
+        String name = sc.nextLine();
 
-        if (b.addShip(row, col, len, promptUserChar())) {
+        if (b.addShip(row, col, len, orientation, name)) {
             System.out.println("New ship added!");
             if (len == 3) {
                 shipLen3 = true;
@@ -53,15 +51,15 @@ public class Battleship {
         }
     }
 
-    // helper method for addShip() & shoot(), gets int from user
-    private int promptUserInt(String text) {
+    // helper method for addShip() & shoot(), gets int from user where l <= int <= u
+    private int promptUserInt(String text, int l, int u) {
         int n;
         while (true) {
             System.out.println(text);
             try {
                 n = Integer.parseInt(sc.nextLine());
 
-                if (n > 0 && n < 10) {
+                if (n >= l && n <= u) {
                     return n;
                 }
             } 
@@ -69,7 +67,7 @@ public class Battleship {
         }
     }
 
-    // helper method for addShip(), gets char from user and converts it to boolean
+    // helper method for addShip(), gets orientation from user and converts it to boolean
     private boolean promptUserChar() {
         String input;
         while (true) {
@@ -86,39 +84,44 @@ public class Battleship {
         }
     }
 
-    private void play() {
-        if (b.gameOver()) {
-            System.out.println("Game Over!");
-            return;
-        }
-
-        System.out.println("Press \"s\" to shoot at a square, \"b\" to see the board, \"q\" to quit.");
+    public boolean play(Board o, Board p) { // o is opponent's board && p is recorded opponent's board
+        System.out.println("Press \"s\" to shoot at a square, \"b\" to see your board, or \"o\" to see your guesses for opponent's board");
         String input = sc.nextLine();
 
         // guides all possible actions
         if (input.equals("s")) {
-            shoot();
+            return shoot(o, p);
         } else if (input.equals("b")) {
             System.out.println("\n" + b.toString());
-        } else if (input.equals("q")) {
-            return;
+        } else if (input.equals("o")) {
+            System.out.println("\n" + p.toString());
         }
-
-        play();
+        return play(o, p);
     }
 
-    private void shoot() {
-        int row = promptUserInt("Input row");
-        int col = promptUserInt("Input column");
+    private boolean shoot(Board o, Board p) {
+        int row = promptUserInt("Input row", 0, 9);
+        int col = promptUserInt("Input column", 0, 9);
 
-        int n = b.shoot(row, col);
+        int n = o.shoot(row, col);
 
         if (n == 0) {
-            System.out.println("Miss!");
+            System.out.println("\nMiss!");
+            o.setValue(row, col, "m");
+            p.setValue(row, col, "m");
         } else if (n == 1) {
-            System.out.println("Hit!");
+            System.out.println("\nHit!");
+            o.setValue(row, col, "x");
+            p.setValue(row, col, "x");
         } else if (n == 2) {
-            System.out.println("You already tried that");
+            System.out.println("\nYou already tried that");
+            return false;
         }
+        System.out.println("\n" + p.toString());
+        return true;
+    }
+
+    public Board getBoard() {
+        return b;
     }
 }

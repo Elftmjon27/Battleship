@@ -1,6 +1,8 @@
 public class Board {
 	private String[][] squares = new String[10][10];
 	// Battleship board is always 10 x 10, so squares is of fixed size
+	private Ship[][] ships = new Ship[10][10];
+	// stores ship references at coordinates on board
 
 	// fills the board with "-"
 	public Board() {
@@ -11,7 +13,7 @@ public class Board {
 		}
 	}
 
-	// returns entre board condensed to a single string, string meant to be printed
+	// returns entire board condensed to a single string, string meant to be printed
 	public String toString() {
 		String output = "";
 
@@ -29,13 +31,13 @@ public class Board {
 		ship goes from left to right if horizontal true, else up to down when horizontal false
 		if ship can't be placed (off grid or intersect another boat), returns false
 	*/
-	public boolean addShip (int row, int col, int len, boolean horizontal) {
+	public boolean addShip (int row, int col, int len, boolean horizontal, String name) {
 		if (row < 0 || row > 9 || col < 0 || col > 9) { // checks whether given coords actually lie on board
 			return false;
 		}
 
 		if (horizontal) {
-			if (col + len > 9) { // checks if farthest coord lies on board
+			if (col + len > 10) { // 10 b/c special case at col = 9 & length = 1
 				return false;
 			}
 
@@ -45,13 +47,15 @@ public class Board {
 				}
 			}
 
+			Ship temp = new Ship(len, name, row, col, horizontal);
 			for (int j = 0; j < len; j++) { // records b on board
 				squares[row][col + j] = "b";
+				ships[row][col + j] = temp;
 			}
 			
 			return true;
 		} else { // same comments as previous, refer to that code
-			if (row + len > 9) {
+			if (row + len > 10) { // 10 b/c special case at row = 9 and length = 1
 				return false;
 			}
 
@@ -61,8 +65,10 @@ public class Board {
 				}
 			}
 
+			Ship temp = new Ship(len, name, row, col, horizontal);
 			for (int j = 0; j < len; j++) {
 				squares[row + j][col] = "b";
+				ships[row + j][col] = temp;
 			}
 
 			return true;
@@ -120,10 +126,11 @@ public class Board {
 		}
 
 		if (squares[row][col].equals("-")) {
-			squares[row][col] = "m";
+			//squares[row][col] = "m";
 			return 0;
 		} else if (squares[row][col].equals("b")) {
-			squares[row][col] = "x";
+			//squares[row][col] = "x";
+			ships[row][col].updateHit();
 			return 1;
 		} else {
 			return 2;
@@ -138,11 +145,12 @@ public class Board {
 		return false;
 	}
 
-	// returns value that specific coords (Assumes coords are valid)
+	// returns value at specified coords (Assumes coords are valid)
 	public String getValue(int x, int y) {
 		return squares[x][y];
 	}
 
+	// sets value at specified coords (Assumes coords are valid)
 	public void setValue(int x, int y, String s) {
 		squares[x][y] = s;
 	}
